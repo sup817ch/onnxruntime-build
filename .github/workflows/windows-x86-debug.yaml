@@ -153,43 +153,7 @@ jobs:
           file_glob: true
           file: "./*.tar.bz2"
           overwrite: true
-          repo_name: csukuangfj/onnxruntime-libs
-          repo_token: ${{ secrets.UPLOAD_GH_SHERPA_ONNX_TOKEN }}
           tag: v${{ env.ONNXRUNTIME_VERSION }}
-
-      - name: Publish to huggingface
-        if: steps.cache-build-result.outputs.cache-hit != 'true'
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        uses: nick-fields/retry@v2
-        with:
-          max_attempts: 20
-          timeout_seconds: 200
-          shell: bash
-          command: |
-            git config --global user.email "csukuangfj@gmail.com"
-            git config --global user.name "Fangjun Kuang"
-
-            rm -rf huggingface
-            export GIT_LFS_SKIP_SMUDGE=1
-            export GIT_CLONE_PROTECTION_ACTIVE=false
-
-            ls -lh
-
-            git clone https://huggingface.co/csukuangfj/onnxruntime-libs huggingface
-            cd huggingface
-            git pull
-
-            name=onnxruntime-win-x86-static_lib-${{ matrix.build_type }}-${{ env.ONNXRUNTIME_VERSION }}.tar.bz2
-            version=${{ env.ONNXRUNTIME_VERSION }}
-            mkdir -p $version
-
-            cp -v ../$name $version/
-
-            git status
-            git add .
-            git commit -m "add $name"
-            git push https://csukuangfj:$HF_TOKEN@huggingface.co/csukuangfj/onnxruntime-libs main
 
       - uses: actions/upload-artifact@v4
         if: steps.cache-build-result.outputs.cache-hit != 'true'
